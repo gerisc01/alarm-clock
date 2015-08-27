@@ -1,0 +1,38 @@
+<html>
+  <head>
+    <title>Hello World</title>
+    <script src="jquery-1.11.2.min.js"></script>
+    <script>
+        var am_pm = ["AM","PM"];
+        var hour = 11;
+        var minute = 59;
+        var second = 0;
+        var morning = 1;
+        function nextSecond() {
+            second = parseInt($("#second").text(),10);
+            second = (second + 1) % 60;
+            if (second == 0) {
+                minute = parseInt($("#minute").text(),10);
+                minute = (minute + 1) % 60;
+                if (minute == 0) {
+                    hour = parseInt($("#hour").text(),10);
+                    hour = (hour % 12) + 1
+                    if (hour == 12) {
+                        morning = (morning + 1) % 2;
+                        $("#am_pm").text(am_pm[morning]);
+                    }
+                }
+            }
+            $("#hour").text(hour)
+            $("#minute").text(minute)
+            $("#second").text(second);
+        }
+
+        setInterval(nextSecond, 1000);
+    </script>
+  </head>
+  <body>
+    <h2>Seconds</h2>
+    <h3><span id="hour">11</span>:<span id="minute">59</span> <span id="second">50</span> <span id="am_pm">PM</span></h3>
+  </body>
+</html>
