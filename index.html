@@ -4,10 +4,10 @@
     <script src="jquery-1.11.2.min.js"></script>
     <script>
         var am_pm = ["AM","PM"];
-        var hour = 11;
-        var minute = 59;
+        var hour = 1;
+        var minute = 0;
         var second = 0;
-        var morning = 1;
+        var morning = 0;
         function nextSecond() {
             second = parseInt($("#second").text(),10);
             second = (second + 1) % 60;
@@ -28,11 +28,34 @@
             $("#second").text(second);
         }
 
-        setInterval(nextSecond, 1000);
+        function setJSDate() {
+            var time = new Date();
+            minute = time.getMinutes();
+            second = time.getSeconds();
+
+            var militaryHour = time.getHours();
+            if (militaryHour > 11) {
+                morning = 1;
+                hour = militaryHour - 12;
+            } else {
+                hour = militaryHour;
+            }
+
+            if (hour == 0) {
+                hour = 12;
+            }
+
+            $("#hour").text(hour);
+            $("#minute").text(minute);
+            $("#second").text(second);
+            $("#am_pm").text(am_pm[morning]);
+            console.log("after setters");
+        }
     </script>
   </head>
   <body>
     <h2>Seconds</h2>
-    <h3><span id="hour">11</span>:<span id="minute">59</span> <span id="second">50</span> <span id="am_pm">PM</span></h3>
+    <h3><span id="hour">00</span>:<span id="minute">00</span> <span id="second">00</span> <span id="am_pm">AM</span></h3>
+    <script>setJSDate();setInterval(nextSecond, 1000);</script>
   </body>
 </html>
