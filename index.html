@@ -4,28 +4,64 @@
     <script src="jquery-1.11.2.min.js"></script>
     <script>
         var am_pm = ["AM","PM"];
-        var hour = 1;
-        var minute = 0;
-        var second = 0;
+        // Seconds
+        // If 32 seconds, tens_of_seconds = 3 and single_second = 2
+        var single_second = 0;
+        var tens_of_seconds = 0;
+
+        // Minutes
+        // If 45 minutes, tens_of_minutes = 4 and single_minute = 5
+        var single_minute = 0;
+        var tens_of_minutes = 0;
+
+        // Hours, same as others
+        var single_hour = 0;
+        var tens_of_hours = 0;
+
+        // AM/PM, if it is AM, morning = 0 and PM, morning = 1
         var morning = 0;
+
         function nextSecond() {
-            second = parseInt($("#second").text(),10);
-            second = (second + 1) % 60;
-            if (second == 0) {
-                minute = parseInt($("#minute").text(),10);
-                minute = (minute + 1) % 60;
-                if (minute == 0) {
-                    hour = parseInt($("#hour").text(),10);
-                    hour = (hour % 12) + 1
-                    if (hour == 12) {
-                        morning = (morning + 1) % 2;
-                        $("#am_pm").text(am_pm[morning]);
+            //single_second = parseInt($("#second_right").text(),10);
+            single_second = (single_second + 1) % 10;
+            $("#second_right").text(single_second);
+            if (single_second == 0) {
+                tens_of_seconds = (tens_of_seconds + 1) % 6;
+                $("#second_left").text(tens_of_seconds);
+
+                if (tens_of_seconds == 0) {
+                    single_minute = (single_minute + 1) % 10;
+                    $("#minute_right").text(single_minute);
+
+                    if (single_minute == 0) {
+                        tens_of_minutes = (tens_of_minutes + 1) % 10;
+                        $("#minute_left").text(tens_of_minutes);
+
+                        if (tens_of_minutes == 0) {
+                            if (tens_of_hours == 0) {
+                                single_hour = (single_hour + 1) % 10;
+                                $("#hour_right").text(single_hour);
+                                
+                                if (single_hour == 0) {
+                                    tens_of_hours = 1;
+                                    $("#hour_left").text("1");
+                                }
+                            } else {
+                                single_hour += 1;
+                                if (single_hour == 2) {
+                                    morning = (morning + 1) % 2;
+                                    $("#am_pm").text(am_pm[morning]);
+                                } else if (single_hour == 3) {
+                                    tens_of_hours = 0;
+                                    single_hour = 1;
+                                }
+                                $("#hour_left").text(tens_of_hours);
+                                $("#hour_right").text(single_hour);
+                            }
+                        }
                     }
                 }
             }
-            $("#hour").text(hour)
-            $("#minute").text(minute)
-            $("#second").text(second);
         }
 
         function setJSDate() {
@@ -45,17 +81,48 @@
                 hour = 12;
             }
 
-            $("#hour").text(hour);
-            $("#minute").text(minute);
-            $("#second").text(second);
-            $("#am_pm").text(am_pm[morning]);
-            console.log("after setters");
+            tens_of_hours = Math.floor(hour/10);
+            single_hour = hour % 10;
+
+            tens_of_minutes = Math.floor(minute/10);
+            single_minute = minute % 10;
+
+            tens_of_seconds = Math.floor(second/10);
+            single_second = second % 10;
+
+            drawAlarm();
         }
+
+        function drawAlarm() {
+            $("#hour_right").text(single_hour);
+            $('#hour_left').text(tens_of_hours);
+
+            $("#minute_left").text(Math.floor(minute/10));
+            $("#minute_right").text(minute%10);
+
+            $("#second_left").text(Math.floor(second/10));
+            $("#second_right").text(second%10);
+
+            $("#am_pm").text(am_pm[morning]);
+        }
+
+        // Load the Node WK window library to figure out when the application is
+        // in focus
+        var gui = require('nw.gui');
+
+        // Reference to window and tray
+        var win = gui.Window.get();
+
+        win.on('focus', function() {
+          setJSDate();
+        });
     </script>
   </head>
   <body>
     <h2>Seconds</h2>
-    <h3><span id="hour">00</span>:<span id="minute">00</span> <span id="second">00</span> <span id="am_pm">AM</span></h3>
+    <h3>
+        <span id="hour_left">0</span><span id="hour_right">0</span>:<span id="minute_left">0</span><span id="minute_right">0</span>
+        <span id="second_left">0</span><span id="second_right">0</span> <span id="am_pm">AM</span></h3>
     <script>setJSDate();setInterval(nextSecond, 1000);</script>
   </body>
 </html>
