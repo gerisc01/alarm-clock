@@ -1,7 +1,23 @@
 <html>
   <head>
     <title>Hello World</title>
-    <script src="jquery-1.11.2.min.js"></script>
+    <script src="resources/js/jquery-1.11.2.min.js"></script>
+    <style>
+        @font-face {
+            font-family: alarmClock;
+            src: url("resources/fonts/white-rabbit/whitrabt.ttf") format('truetype');
+        }
+
+        .alarm-clock {
+            font-family: alarmClock;
+            font-size: 50px;
+        }
+
+        .alarm-clock span {
+            font-family: alarmClock;
+            font-size: 50px;
+        }
+    </style>
     <script>
         var am_pm = ["AM","PM"];
         // Seconds
@@ -121,9 +137,9 @@
   </head>
   <body>
     <h2>Seconds</h2>
-    <h3>
-        <span id="hour_left">0</span><span id="hour_right">0</span>:<span id="minute_left">0</span><span id="minute_right">0</span>
-        <span id="second_left">0</span><span id="second_right">0</span> <span id="am_pm">AM</span></h3>
+    <div class="alarm-clock">
+        <span id="hour_left">0</span><span id="hour_right">0</span>:<span id="minute_left">0</span><span id="minute_right">0</span>  <span id="second_left">0</span><span id="second_right">0</span> <span id="am_pm">AM</span>
+    </div>
     <script>setJSDate();setInterval(nextSecond, 1000);</script>
   </body>
 </html>
