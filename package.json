@@ -5,6 +5,7 @@
   "main": "index.html",
   "window": {
     "toolbar": false,
-    "kiosk" : "true"
+    "height" : 240,
+    "width" : 400
   }
 }

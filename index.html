@@ -37,9 +37,13 @@
         // AM/PM, if it is AM, morning = 0 and PM, morning = 1
         var morning = 0;
 
+        // Setup an interval variable for the clock, so that it can be 
+        // cleared if need be
+        var clockInterval = null;
+
         function nextSecond() {
             // Every 5 minutes, at 2:43 and 7:43, check the time against the javascript date time
-            if (tens_of_seconds == 4 && single_second == 3 && (single_minute == 7 || single_minute == 2)) { setJSDate(); }
+            if (tens_of_seconds == 4 && single_second == 3 && (single_minute == 7 || single_minute == 2)) { setJSDate(); return; }
             single_second = (single_second + 1) % 10;
             $("#second_right").text(single_second);
             if (single_second == 0) {
@@ -51,7 +55,7 @@
                     $("#minute_right").text(single_minute);
 
                     if (single_minute == 0) {
-                        tens_of_minutes = (tens_of_minutes + 1) % 10;
+                        tens_of_minutes = (tens_of_minutes + 1) % 6;
                         $("#minute_left").text(tens_of_minutes);
 
                         if (tens_of_minutes == 0) {
@@ -81,10 +85,58 @@
             }
         }
 
-        function setJSDate() {
+        function nextMinute() {
+            // Every 30 minutes at :07 and :37, check the time against the javascript date time
+            single_minute = (single_minute + 1) % 10;
+            $("#minute_right").text(single_minute);
+
+            if (single_minute == 7 && (tens_of_minutes == 0 || tens_of_minutes == 3)) {
+                var nextMinute = (60 - (new Date()).getSeconds()) * 1000 + 5;
+                setTimeout(initClock(false),nextMinute);
+            }
+
+            if (single_minute == 0) {
+                tens_of_minutes = (tens_of_minutes + 1) % 6;
+                $("#minute_left").text(tens_of_minutes);
+
+                if (tens_of_minutes == 0) {
+                    if (tens_of_hours == 0) {
+                        single_hour = (single_hour + 1) % 10;
+                        $("#hour_right").text(single_hour);
+                        
+                        if (single_hour == 0) {
+                            tens_of_hours = 1;
+                            $("#hour_left").text("1");
+                        }
+                    } else {
+                        single_hour += 1;
+                        if (single_hour == 2) {
+                            morning = (morning + 1) % 2;
+                            $("#am_pm").text(am_pm[morning]);
+                        } else if (single_hour == 3) {
+                            tens_of_hours = 0;
+                            single_hour = 1;
+                        }
+                        $("#hour_left").text(tens_of_hours);
+                        $("#hour_right").text(single_hour);
+                    }
+                }
+            }
+        }
+
+        function initClock(includeSeconds) {
+            if (includeSeconds) {
+                setJSDate(true);
+                clockInterval = setInterval(nextSecond, 1000);
+            } else {
+                setJSDate(false);
+                clockInterval = setInterval(nextMinute, 60000);
+            }
+        }
+
+        function setJSDate(includeSeconds) {
             var time = new Date();
-            minute = time.getMinutes();
-            second = time.getSeconds();
+            var minute = time.getMinutes();
 
             var militaryHour = time.getHours();
             if (militaryHour > 11) {
@@ -104,15 +156,29 @@
             tens_of_minutes = Math.floor(minute/10);
             single_minute = minute % 10;
 
-            tens_of_seconds = Math.floor(second/10);
-            single_second = second % 10;
+            if (includeSeconds === true) {
+                var second = time.getSeconds();
+                tens_of_seconds = Math.floor(second/10);
+                single_second = second % 10;
+
+                $("#second_left").text(tens_of_seconds);
+                $("#second_right").text(single_second);
+            }
+
+            $("#hour_right").text(single_hour);
+            $("#hour_left").text(tens_of_hours);
+
+            $("#minute_left").text(tens_of_minutes);
+            $("#minute_right").text(single_minute);
+
+            $("#am_pm").text(am_pm[morning]);
 
             drawAlarm();
         }
 
         function drawAlarm() {
             $("#hour_right").text(single_hour);
-            $('#hour_left').text(tens_of_hours);
+            $("#hour_left").text(tens_of_hours);
 
             $("#minute_left").text(tens_of_minutes);
             $("#minute_right").text(single_minute);
@@ -138,8 +204,8 @@
   <body>
     <h2>Seconds</h2>
     <div class="alarm-clock">
-        <span id="hour_left">0</span><span id="hour_right">0</span>:<span id="minute_left">0</span><span id="minute_right">0</span>  <span id="second_left">0</span><span id="second_right">0</span> <span id="am_pm">AM</span>
+        <span id="hour_left">0</span><span id="hour_right">0</span>:<span id="minute_left">0</span><span id="minute_right">0</span>  <span id="second_left"></span><span id="second_right"></span> <span id="am_pm">AM</span>
     </div>
-    <script>setJSDate();setInterval(nextSecond, 1000);</script>
+    <script>initClock(true);</script>
   </body>
 </html>
