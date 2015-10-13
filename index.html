@@ -43,7 +43,7 @@
 
         function nextSecond() {
             // Every 5 minutes, at 2:43 and 7:43, check the time against the javascript date time
-            if (tens_of_seconds == 4 && single_second == 3 && (single_minute == 7 || single_minute == 2)) { setJSDate(); return; }
+            if (tens_of_seconds == 4 && single_second == 3 && (single_minute == 7 || single_minute == 2)) { setJSDate(true); return; }
             single_second = (single_second + 1) % 10;
             $("#second_right").text(single_second);
             if (single_second == 0) {
@@ -91,6 +91,7 @@
             $("#minute_right").text(single_minute);
 
             if (single_minute == 7 && (tens_of_minutes == 0 || tens_of_minutes == 3)) {
+                clearInterval(clockInterval);
                 var nextMinute = (60 - (new Date()).getSeconds()) * 1000 + 5;
                 setTimeout(initClock(false),nextMinute);
             }
@@ -124,13 +125,20 @@
             }
         }
 
+        function firstMinute() {
+            setJSDate(false);
+            clockInterval = setInterval(nextMinute, 60000);
+        }
+
         function initClock(includeSeconds) {
+            clearInterval(clockInterval);
+            setJSDate(includeSeconds);
+
             if (includeSeconds) {
-                setJSDate(true);
                 clockInterval = setInterval(nextSecond, 1000);
             } else {
-                setJSDate(false);
-                clockInterval = setInterval(nextMinute, 60000);
+                var secondsLeft = (60 - (new Date()).getSeconds()) * 1000 + 5;
+                setTimeout(firstMinute,secondsLeft);
             }
         }
 
@@ -172,21 +180,6 @@
             $("#minute_right").text(single_minute);
 
             $("#am_pm").text(am_pm[morning]);
-
-            drawAlarm();
-        }
-
-        function drawAlarm() {
-            $("#hour_right").text(single_hour);
-            $("#hour_left").text(tens_of_hours);
-
-            $("#minute_left").text(tens_of_minutes);
-            $("#minute_right").text(single_minute);
-
-            $("#second_left").text(tens_of_seconds);
-            $("#second_right").text(single_second);
-
-            $("#am_pm").text(am_pm[morning]);
         }
 
         // Load the Node WK window library to figure out when the application is
@@ -206,6 +199,6 @@
     <div class="alarm-clock">
         <span id="hour_left">0</span><span id="hour_right">0</span>:<span id="minute_left">0</span><span id="minute_right">0</span>  <span id="second_left"></span><span id="second_right"></span> <span id="am_pm">AM</span>
     </div>
-    <script>initClock(true);</script>
+    <script>initClock(false);</script>
   </body>
 </html>
