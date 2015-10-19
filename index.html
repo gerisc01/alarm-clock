@@ -17,6 +17,14 @@
             font-family: alarmClock;
             font-size: 50px;
         }
+
+        .alarm-active {
+            background: red;
+        }
+
+        .snooze-button {
+            border: solid;
+        }
     </style>
     <script>
         var am_pm = ["AM","PM"];
@@ -123,16 +131,20 @@
                     }
                 }
             }
+
+            checkAlarm();
         }
 
         function firstMinute() {
             setJSDate(false);
             clockInterval = setInterval(nextMinute, 60000);
+            checkAlarm();
         }
 
         function initClock(includeSeconds) {
             clearInterval(clockInterval);
             setJSDate(includeSeconds);
+            checkAlarm();
 
             if (includeSeconds) {
                 clockInterval = setInterval(nextSecond, 1000);
@@ -182,23 +194,42 @@
             $("#am_pm").text(am_pm[morning]);
         }
 
+        function checkAlarm() {
+            var time = tens_of_hours+""+single_hour+":"+tens_of_minutes+""+single_minute;
+            if (time === "12:43") {
+                playAlarm();
+            }
+        }
+
+        function playAlarm() {
+            $(".alarm-clock").addClass("alarm-active");
+        }
+
+        function clearAlarm() {
+            $(".alarm-clock").removeClass("alarm-active");
+        }
+
         // Load the Node WK window library to figure out when the application is
         // in focus
         var gui = require('nw.gui');
 
         // Reference to window and tray
         var win = gui.Window.get();
-
-        win.on('focus', function() {
-          setJSDate();
-        });
     </script>
   </head>
   <body>
-    <h2>Seconds</h2>
+    <div class="snooze-button">
+        <h3>Snooze</h3>
+    </div>
     <div class="alarm-clock">
         <span id="hour_left">0</span><span id="hour_right">0</span>:<span id="minute_left">0</span><span id="minute_right">0</span>  <span id="second_left"></span><span id="second_right"></span> <span id="am_pm">AM</span>
     </div>
-    <script>initClock(false);</script>
+    <script>
+    initClock(false); 
+
+    $(".snooze-button").click(function() {
+           clearAlarm();
+        });
+    </script>
   </body>
 </html>
