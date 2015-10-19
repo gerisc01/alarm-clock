@@ -1,6 +1,6 @@
 <html>
   <head>
-    <title>Hello World</title>
+    <title>Alarm Clock</title>
     <script src="resources/js/jquery-1.11.2.min.js"></script>
     <style>
         @font-face {
@@ -44,6 +44,9 @@
 
         // AM/PM, if it is AM, morning = 0 and PM, morning = 1
         var morning = 0;
+
+        // The list of today's active alarms
+        var active_alarms = []
 
         // Setup an interval variable for the clock, so that it can be 
         // cleared if need be
@@ -196,8 +199,14 @@
 
         function checkAlarm() {
             var time = tens_of_hours+""+single_hour+":"+tens_of_minutes+""+single_minute;
-            if (time === "12:43") {
-                playAlarm();
+            time += " " + am_pm[morning];
+            console.log(active_alarms);
+            for (var i=0; i<active_alarms.length; i++) {
+                console.log(active_alarms[i]);
+                console.log(time);
+                if (time === active_alarms[i]) {
+                    playAlarm();
+                }
             }
         }
 
@@ -207,6 +216,16 @@
 
         function clearAlarm() {
             $(".alarm-clock").removeClass("alarm-active");
+        }
+
+        function alarmAdd(time) {
+            if (/^[01]?[0-9]:[0-5][0-9]\s?[PA]M$/i.test(time)) {
+                $("#activeAlarm").text(time);
+                console.log(time);
+                active_alarms.push(time);
+            } else {
+                alert("The time " + time + " doesn't match the format of HH:MM AM/PM");
+            }
         }
 
         // Load the Node WK window library to figure out when the application is
@@ -224,12 +243,23 @@
     <div class="alarm-clock">
         <span id="hour_left">0</span><span id="hour_right">0</span>:<span id="minute_left">0</span><span id="minute_right">0</span>  <span id="second_left"></span><span id="second_right"></span> <span id="am_pm">AM</span>
     </div>
+    <div>
+        <form>
+            Add Alarm: <input type="text" id="formAlarmTime" name="alarmTime"/>
+            <input type="button" id="addAlarmSubmit" value="Add"/>
+        </form>
+        Active Alarm: <span id="activeAlarm"/>
+    </div>
     <script>
     initClock(false); 
 
     $(".snooze-button").click(function() {
-           clearAlarm();
-        });
+        clearAlarm();
+    });
+
+    $('#addAlarmSubmit').click(function() {
+        alarmAdd($('#formAlarmTime').val());
+    });
     </script>
   </body>
 </html>
