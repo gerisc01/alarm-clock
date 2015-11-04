@@ -2,6 +2,7 @@
   <head>
     <title>Alarm Clock</title>
     <script src="resources/js/jquery-1.11.2.min.js"></script>
+    <script src="resources/js/clock.js"></script>
     <style>
         @font-face {
             font-family: alarmClock;
@@ -24,6 +25,20 @@
 
         .snooze-button {
             border: solid;
+            float: left;
+            width: 50%;
+        }
+
+        .off-button {
+            border: solid;
+            float: left;
+            width: 49%;
+        }
+
+        .button-container {
+            width: 100%;
+            height: auto;
+            overflow: auto;
         }
     </style>
     <script>
@@ -46,7 +61,7 @@
         var morning = 0;
 
         // The list of today's active alarms
-        var active_alarms = []
+        var active_alarms = [];
 
         // Setup an interval variable for the clock, so that it can be 
         // cleared if need be
@@ -200,10 +215,7 @@
         function checkAlarm() {
             var time = tens_of_hours+""+single_hour+":"+tens_of_minutes+""+single_minute;
             time += " " + am_pm[morning];
-            console.log(active_alarms);
             for (var i=0; i<active_alarms.length; i++) {
-                console.log(active_alarms[i]);
-                console.log(time);
                 if (time === active_alarms[i]) {
                     playAlarm();
                 }
@@ -214,12 +226,17 @@
             $(".alarm-clock").addClass("alarm-active");
         }
 
+        function snoozeAlarm() {
+            $(".alarm-clock").removeClass("alarm-active");
+        }
+
         function clearAlarm() {
             $(".alarm-clock").removeClass("alarm-active");
         }
 
         function alarmAdd(time) {
             if (/^[01]?[0-9]:[0-5][0-9]\s?[PA]M$/i.test(time)) {
+                $("#formAlarmTime").val("");
                 $("#activeAlarm").text(time);
                 console.log(time);
                 active_alarms.push(time);
@@ -237,8 +254,13 @@
     </script>
   </head>
   <body>
-    <div class="snooze-button">
-        <h3>Snooze</h3>
+    <div class="button-container">
+        <div class="snooze-button">
+            <h3>Snooze</h3>
+        </div>
+        <div class="off-button">
+            <h3>Off</h3>
+        </div>
     </div>
     <div class="alarm-clock">
         <span id="hour_left">0</span><span id="hour_right">0</span>:<span id="minute_left">0</span><span id="minute_right">0</span>  <span id="second_left"></span><span id="second_right"></span> <span id="am_pm">AM</span>
@@ -251,9 +273,13 @@
         Active Alarm: <span id="activeAlarm"/>
     </div>
     <script>
-    initClock(false); 
+    initClock(false);
 
     $(".snooze-button").click(function() {
+        clearAlarm();
+    });
+
+    $(".off-button").click(function() {
         clearAlarm();
     });
 
