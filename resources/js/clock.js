@@ -12,8 +12,10 @@ var Clock = function (parent, seconds) {
     this.militaryTime = false;
 
     this.moduleName = "clock";
-    this.parentElement = "module_1";
+    this.parentElement = "module1";
+
     this.syncTime();
+    this.draw();
 };
 
 /******************************************************************************
@@ -21,16 +23,42 @@ var Clock = function (parent, seconds) {
 ******************************************************************************/
 
 Clock.prototype.draw = function() {
-    var clockContainer = $("<div/>").addClass("alarm-clock");
-    var hours = $("<span/>").attr("id","hours");
-    hours.append("<ul/>","<ul/>");
-    var minutes = $("<span/>").attr("id","minutes");
-    minutes.append("<ul/>","<ul/>");
+    var clockContainer = $("<div/>").addClass("clock-module");
+    
+    // Draw the seconds if the clock is configured for that
     if (this.seconds !== undefined) {
         var seconds = $("<span/>").attr("id","seconds");
-        seconds.append("<ul/>","<ul/>");
+        seconds.append($("<ul/>").text(this.seconds.toString().substr(0,1)));
+        seconds.append($("<ul/>").text(this.seconds.toString().substr(1)));
     }
-    $("div#"+this.parentElement).append("");
+
+    // Draw the minutes
+    var minutes = $("<span/>").attr("id","minutes");
+    minutes.append($("<ul/>").text(this.minutes.toString().substr(0,1)));
+    minutes.append($("<ul/>").text(this.minutes.toString().substr(1)));
+    if (this.seconds !== undefined) minutes.append("<ul> </ul>");
+
+    // Draw the hours
+    var hours = $("<span/>").attr("id","hours");
+    var displayHr,am_pm;
+    if (this.militaryTime === true) {
+        hourStr = this.hours;
+    } else {
+        displayHr = this.hours > 12 ? this.hours - 12 : this.hours;
+        am_pm = displayHr < 12 ? "AM" : "PM";
+        if (displayHr === 0) displayHr = 12;
+    }
+    hours.append($("<ul/>").text(displayHr.toString().substr(0,1)));
+    if (displayHr > 9) { hours.append($("<ul/>").text(displayHr.toString().substr(1))); }
+    hours.append("<ul>:</ul>");
+
+    clockContainer.append(hours,minutes);
+    if (this.seconds !== undefined) clockContainer.append(seconds);
+    if (am_pm !== undefined) clockContainer.append($("<span/>").text(am_pm));
+
+    $("div#"+this.parentElement+" div.clock-module").remove();
+    $("div#"+this.parentElement).append(clockContainer);
+
 };
 Clock.prototype.destroy = function() {};
 Clock.prototype.getAlarms = function() {
