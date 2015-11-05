@@ -9,16 +9,6 @@
             src: url("resources/fonts/white-rabbit/whitrabt.ttf") format('truetype');
         }
 
-        .alarm-clock {
-            font-family: alarmClock;
-            font-size: 50px;
-        }
-
-        .alarm-clock span {
-            font-family: alarmClock;
-            font-size: 50px;
-        }
-
         .alarm-active {
             background: red;
         }
@@ -260,39 +250,37 @@
     </script>
   </head>
   <body>
-    <div class="button-container">
+<!--     <div class="button-container">
         <div class="snooze-button">
             <h3>Snooze</h3>
         </div>
         <div class="off-button">
             <h3>Off</h3>
         </div>
-    </div>
-    <div class="alarm-clock">
-        <span id="hour_left">0</span><span id="hour_right">0</span>:<span id="minute_left">0</span><span id="minute_right">0</span>  <span id="second_left"></span><span id="second_right"></span> <span id="am_pm">AM</span>
-    </div>
-    <div>
+    </div> -->
+    <div id="module1"></div>
+<!--     <div>
         <form>
             Add Alarm: <input type="text" id="formAlarmTime" name="alarmTime"/>
             <input type="button" id="addAlarmSubmit" value="Add"/>
         </form>
         Active Alarm: <span id="activeAlarm"/>
-    </div>
-    <div id="module1"></div>
+    </div> -->
     <script>
-    initClock(false);
+    var clock = new Clock("module1",true);
+    // initClock(false);
 
-    $(".snooze-button").click(function() {
-        clearAlarm();
-    });
+    // $(".snooze-button").click(function() {
+    //     clearAlarm();
+    // });
 
-    $(".off-button").click(function() {
-        clearAlarm();
-    });
+    // $(".off-button").click(function() {
+    //     clearAlarm();
+    // });
 
-    $('#addAlarmSubmit').click(function() {
-        alarmAdd($('#formAlarmTime').val());
-    });
+    // $('#addAlarmSubmit').click(function() {
+    //     alarmAdd($('#formAlarmTime').val());
+    // });
     </script>
   </body>
 </html>
