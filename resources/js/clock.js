@@ -8,7 +8,7 @@
 var Clock = function (parent, seconds) {
     // Configuration variables
     this.moduleName = "clock";
-    this.parentElement = "module1";
+    this.parentElement = parent;
     this.militaryTime = false;
 
     // Modifiable Variables
