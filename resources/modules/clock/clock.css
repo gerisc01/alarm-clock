@@ -1,0 +1,32 @@
+@font-face {
+    font-family: alarmClock;
+    src: url("resources/fonts/white-rabbit/whitrabt.ttf") format('truetype');
+}
+
+.alarm-active {
+    background: red;
+}
+
+.snooze-button {
+    border: solid;
+    float: left;
+    width: 50%;
+}
+
+.off-button {
+    border: solid;
+    float: left;
+    width: 49%;
+}
+
+.clock.time ul {
+    display: inline;
+    padding:0px;
+    font-size: 50px;
+}
+
+.button-container {
+    width: 100%;
+    height: auto;
+    overflow: auto;
+}

@@ -20,20 +20,26 @@ var Clock = function (parent, seconds) {
     this.secondsInterval = undefined;
 
     // Constructor Actions
-    this.start();
-    this.draw();
-    console.log(this.hours);
-    console.log(this.minutes);
-    console.log(this.seconds);
+    this.load();
 };
 
 /******************************************************************************
         INSTANCE METHODS
 ******************************************************************************/
 
-Clock.prototype.draw = function() {
-    var clockContainer = $("<div/>").addClass("clock-module");
+Clock.prototype.load = function() {
+    var pThis = this;
+    $.get("resources/modules/clock/clock.html", function(data){
+        $("div#"+pThis.parentElement).html(data);
+        pThis.setupListeners();
+        pThis.start();
+        pThis.draw();
+    });
+};
 
+Clock.prototype.draw = function() {
+    var clockContainer = $("<div/>").addClass("clock").addClass("time");
+    
     // Draw the hours
     var hoursObj = $("<span/>").attr("id","hours");
     var displayHr,am_pm;
@@ -41,7 +47,7 @@ Clock.prototype.draw = function() {
         displayHr = this.hours;
     } else {
         displayHr = this.hours > 12 ? this.hours - 12 : this.hours;
-        am_pm = displayHr < 12 ? "AM" : "PM";
+        am_pm = this.hours < 12 ? "AM" : "PM";
         if (displayHr === 0) displayHr = 12;
     }
     hoursObj.append($("<ul/>").text(displayHr.toString().substr(0,1)));
@@ -71,9 +77,11 @@ Clock.prototype.draw = function() {
     // Append AM/PM value to clock container if not military time
     if (am_pm !== undefined) clockContainer.append($("<span/>").text(am_pm));
 
-    $("div#"+this.parentElement+" div.clock-module").remove();
-    $("div#"+this.parentElement).append(clockContainer);
-};
+    // Replace the old clock container with the new one
+    $("div#"+this.parentElement+" div.clock.time").replaceWith(clockContainer);
+    // $("div#"+this.parentElement+" div.clock-module").remove();
+    // $("div#"+this.parentElement).append(clockContainer);
+}
 
 Clock.prototype.start = function() {
     clearInterval(this.clockInterval);
@@ -92,6 +100,21 @@ Clock.prototype.getAlarms = function() {
     return this.alarms;
 };
 
+Clock.prototype.checkAlarms = function() {
+    var time = this.currentTime();
+    for (var alarm of this.getAlarms()) {
+        if (time === alarm.time) this.playAlarm();
+    }
+}
+
+Clock.prototype.playAlarm = function() {
+    console.log("ring ring ring ring");
+}
+
+Clock.prototype.snoozeAlarm = function() {}
+Clock.prototype.clearAlarm = function() {}
+Clock.prototype.destroyAlarm = function() {}
+
 // time: [String] Time in 24 hours
 // repeat: [Boolean] Does the alarm repeat
 // days: [String] If the alarm does repeat, for what days. If not, what
@@ -107,8 +130,9 @@ Clock.prototype.setAlarm = function(time,repeat,days,alarmFile) {
     }
     newAlarm["days"] = days;
     newAlarm["alarmFile"] = alarmFile;
-
-    this.alarms.push(this.validateAlarm(newAlarm));
+    
+    this.validateAlarm(newAlarm);
+    this.alarms.push(newAlarm);
 };
 
 /******************************************************************************
@@ -132,6 +156,7 @@ Clock.prototype.nextMinute = function() {
         this.seconds = 0;
         this.secondsInterval = setInterval(this.nextSecond.bind(this),1000);
     }
+    this.checkAlarms();
     this.draw();
 };
 
@@ -158,6 +183,28 @@ Clock.prototype.validateAlarm = function(alarm) {
 Clock.prototype.validateDate = function(date) {};
 Clock.prototype.validateRepeatDays = function(days) {};
 
+Clock.prototype.setupListeners = function() {
+    $(".snooze-button").click(function() {
+        clearAlarm();
+    });
+
+    $(".off-button").click(function() {
+        clearAlarm();
+    });
+
+    $('#addAlarmSubmit').click(function() {
+        clock.setAlarm($('#formAlarmTime').val());
+    });
+}
+
+// Returns the current time as a string (HH:MM[:SS])
+// includeSeconds: [Boolean] If true, the time string includes seconds
+Clock.prototype.currentTime = function(includeSeconds) {
+    var time = this.hours+":"+("0"+this.minutes).slice(-2);
+    if (includeSeconds) time += ":"+("0"+this.seconds).slice(-2);
+    return normalizeMilitaryTime(time);
+};
+
 // Checks if the military time string that was passed in is a valid
 // time and strips the leading zero off of the string if it is present
 
@@ -165,11 +212,11 @@ Clock.prototype.validateRepeatDays = function(days) {};
 function normalizeMilitaryTime(time)
 {
     var normalizedTime = null;
-    var match = /^([01])?[0-9]:[0-5][0-9]$/.exec(time);
+    var match = /^([01])?[0-9]:[0-5][0-9](?::[0-5][0-9])?$/.exec(time);
     if (match !== null) {
         normalizedTime = match[1] == "0" ? time.substr(1) : time;
     } else {
-        match = /^[2][0-3]:[0-5][0-9]$/.exec(time);
+        match = /^[2][0-3]:[0-5][0-9](?::[0-5][0-9])?$/.exec(time);
         if (match !== null) { normalizedTime = time; }
     }
 

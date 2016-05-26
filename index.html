@@ -1,286 +1,40 @@
 <html>
   <head>
-    <title>Alarm Clock</title>
+    <!--Bootstrap meta tags-->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    
+    <!--JS-->
     <script src="resources/js/jquery-1.11.2.min.js"></script>
-    <script src="resources/js/clock.js"></script>
-    <style>
-        @font-face {
-            font-family: alarmClock;
-            src: url("resources/fonts/white-rabbit/whitrabt.ttf") format('truetype');
-        }
-
-        .alarm-active {
-            background: red;
-        }
-
-        .snooze-button {
-            border: solid;
-            float: left;
-            width: 50%;
-        }
-
-        .off-button {
-            border: solid;
-            float: left;
-            width: 49%;
-        }
-
-        .clock-module ul {
-            display: inline;
-            padding:0px;
-            font-size: 50px;
-        }
-
-        .button-container {
-            width: 100%;
-            height: auto;
-            overflow: auto;
-        }
-    </style>
-    <script>
-        var am_pm = ["AM","PM"];
-        // Seconds
-        // If 32 seconds, tens_of_seconds = 3 and single_second = 2
-        var single_second = 0
-        var tens_of_seconds = 0;
-
-        // Minutes
-        // If 45 minutes, tens_of_minutes = 4 and single_minute = 5
-        var single_minute = 0;
-        var tens_of_minutes = 0;
-
-        // Hours, same as others
-        var single_hour = 0;
-        var tens_of_hours = 0;
-
-        // AM/PM, if it is AM, morning = 0 and PM, morning = 1
-        var morning = 0;
-
-        // The list of today's active alarms
-        var active_alarms = [];
-
-        // Setup an interval variable for the clock, so that it can be 
-        // cleared if need be
-        var clockInterval = null;
-
-        function nextSecond() {
-            // Every 5 minutes, at 2:43 and 7:43, check the time against the javascript date time
-            if (tens_of_seconds == 4 && single_second == 3 && (single_minute == 7 || single_minute == 2)) { setJSDate(true); return; }
-            single_second = (single_second + 1) % 10;
-            $("#second_right").text(single_second);
-            if (single_second == 0) {
-                tens_of_seconds = (tens_of_seconds + 1) % 6;
-                $("#second_left").text(tens_of_seconds);
-
-                if (tens_of_seconds == 0) {
-                    single_minute = (single_minute + 1) % 10;
-                    $("#minute_right").text(single_minute);
-
-                    if (single_minute == 0) {
-                        tens_of_minutes = (tens_of_minutes + 1) % 6;
-                        $("#minute_left").text(tens_of_minutes);
-
-                        if (tens_of_minutes == 0) {
-                            if (tens_of_hours == 0) {
-                                single_hour = (single_hour + 1) % 10;
-                                $("#hour_right").text(single_hour);
-                                
-                                if (single_hour == 0) {
-                                    tens_of_hours = 1;
-                                    $("#hour_left").text("1");
-                                }
-                            } else {
-                                single_hour += 1;
-                                if (single_hour == 2) {
-                                    morning = (morning + 1) % 2;
-                                    $("#am_pm").text(am_pm[morning]);
-                                } else if (single_hour == 3) {
-                                    tens_of_hours = 0;
-                                    single_hour = 1;
-                                }
-                                $("#hour_left").text(tens_of_hours);
-                                $("#hour_right").text(single_hour);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        function nextMinute() {
-            // Every 30 minutes at :07 and :37, check the time against the javascript date time
-            single_minute = (single_minute + 1) % 10;
-            $("#minute_right").text(single_minute);
-
-            if (single_minute == 7 && (tens_of_minutes == 0 || tens_of_minutes == 3)) {
-                clearInterval(clockInterval);
-                var nextMinute = (60 - (new Date()).getSeconds()) * 1000 + 5;
-                setTimeout(initClock(false),nextMinute);
-            }
-
-            if (single_minute == 0) {
-                tens_of_minutes = (tens_of_minutes + 1) % 6;
-                $("#minute_left").text(tens_of_minutes);
-
-                if (tens_of_minutes == 0) {
-                    if (tens_of_hours == 0) {
-                        single_hour = (single_hour + 1) % 10;
-                        $("#hour_right").text(single_hour);
-                        
-                        if (single_hour == 0) {
-                            tens_of_hours = 1;
-                            $("#hour_left").text("1");
-                        }
-                    } else {
-                        single_hour += 1;
-                        if (single_hour == 2) {
-                            morning = (morning + 1) % 2;
-                            $("#am_pm").text(am_pm[morning]);
-                        } else if (single_hour == 3) {
-                            tens_of_hours = 0;
-                            single_hour = 1;
-                        }
-                        $("#hour_left").text(tens_of_hours);
-                        $("#hour_right").text(single_hour);
-                    }
-                }
-            }
-
-            checkAlarm();
-        }
-
-        function firstMinute() {
-            setJSDate(false);
-            clockInterval = setInterval(nextMinute, 60000);
-            checkAlarm();
-        }
-
-        function initClock(includeSeconds) {
-            clearInterval(clockInterval);
-            setJSDate(includeSeconds);
-            checkAlarm();
-
-            if (includeSeconds) {
-                clockInterval = setInterval(nextSecond, 1000);
-            } else {
-                var secondsLeft = (60 - (new Date()).getSeconds()) * 1000 + 5;
-                setTimeout(firstMinute,secondsLeft);
-            }
-        }
-
-        function setJSDate(includeSeconds) {
-            var time = new Date();
-            var minute = time.getMinutes();
-
-            var militaryHour = time.getHours();
-            if (militaryHour > 11) {
-                morning = 1;
-                hour = militaryHour - 12;
-            } else {
-                hour = militaryHour;
-            }
-
-            if (hour == 0) {
-                hour = 12;
-            }
-
-            tens_of_hours = Math.floor(hour/10);
-            single_hour = hour % 10;
-
-            tens_of_minutes = Math.floor(minute/10);
-            single_minute = minute % 10;
-
-            if (includeSeconds === true) {
-                var second = time.getSeconds();
-                tens_of_seconds = Math.floor(second/10);
-                single_second = second % 10;
-
-                $("#second_left").text(tens_of_seconds);
-                $("#second_right").text(single_second);
-            }
-
-            $("#hour_right").text(single_hour);
-            $("#hour_left").text(tens_of_hours);
-
-            $("#minute_left").text(tens_of_minutes);
-            $("#minute_right").text(single_minute);
-
-            $("#am_pm").text(am_pm[morning]);
-        }
-
-        function checkAlarm() {
-            var time = tens_of_hours+""+single_hour+":"+tens_of_minutes+""+single_minute;
-            time += " " + am_pm[morning];
-            for (var i=0; i<active_alarms.length; i++) {
-                if (time === active_alarms[i]) {
-                    playAlarm();
-                }
-            }
-        }
-
-        function playAlarm() {
-            $(".alarm-clock").addClass("alarm-active");
-        }
-
-        function snoozeAlarm() {
-            $(".alarm-clock").removeClass("alarm-active");
-        }
-
-        function clearAlarm() {
-            $(".alarm-clock").removeClass("alarm-active");
-        }
-
-        function alarmAdd(time) {
-            if (/^[01]?[0-9]:[0-5][0-9]\s?[PA]M$/i.test(time)) {
-                $("#formAlarmTime").val("");
-                $("#activeAlarm").text(time);
-                console.log(time);
-                active_alarms.push(time);
-            } else {
-                alert("The time " + time + " doesn't match the format of HH:MM AM/PM");
-            }
-        }
-
+    <!--CSS-->
+    <link href="resources/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!--Load Modules-->
+    <!--Clock-->
+    <script src="resources/modules/clock/clock.js"></script>
+    <link href="resources/modules/clock/clock.css" rel="stylesheet">
+    <!--Weather-->
+    <script src="resources/modules/weather/weather.js"></script>
+    <link href="resources/modules/weather/weather.css" rel="stylesheet">
+    
+    <title>Alarm Clock</title>
+    <!--Loading libraries that are used when built as a node application-->
+    <!--<script>
         // Load the Node WK window library to figure out when the application is
         // in focus
         var gui = require('nw.gui');
 
         // Reference to window and tray
         var win = gui.Window.get();
-    </script>
+    </script>-->
   </head>
   <body>
-<!--     <div class="button-container">
-        <div class="snooze-button">
-            <h3>Snooze</h3>
-        </div>
-        <div class="off-button">
-            <h3>Off</h3>
-        </div>
-    </div> -->
     <div id="module1"></div>
-<!--     <div>
-        <form>
-            Add Alarm: <input type="text" id="formAlarmTime" name="alarmTime"/>
-            <input type="button" id="addAlarmSubmit" value="Add"/>
-        </form>
-        Active Alarm: <span id="activeAlarm"/>
-    </div> -->
     <script>
     var clock = new Clock("module1",true);
-    // initClock(false);
-
-    // $(".snooze-button").click(function() {
-    //     clearAlarm();
-    // });
-
-    // $(".off-button").click(function() {
-    //     clearAlarm();
-    // });
-
-    // $('#addAlarmSubmit').click(function() {
-    //     alarmAdd($('#formAlarmTime').val());
-    // });
+    // var weather = new Weather();
     </script>
   </body>
 </html>
